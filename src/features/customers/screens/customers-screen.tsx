@@ -1,47 +1,109 @@
+import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
+import { Input } from '@/components/ui/input';
+import { LoadingState } from '@/components/ui/loading-state';
+import { PrimaryButton } from '@/components/ui/primary-button';
 import { Screen } from '@/components/ui/screen';
 import { SectionHeader } from '@/components/ui/section-header';
+import { useAuth } from '@/features/auth/hooks/use-auth';
+import { CustomerListItem } from '@/features/customers/components/customer-list-item';
+import { useCustomersQuery } from '@/features/customers/hooks/use-customers-query';
+import { createCustomerRoute, getCustomerDetailRoute } from '@/features/customers/lib/customer-routes';
 
-const customerFocus = [
-  'Find a customer fast from the field',
-  'Start a new closeout without admin clutter',
-  'Return to repeat customers in one tap',
-];
+function matchesSearch(search: string, fields: Array<string | null>) {
+  const normalized = search.trim().toLowerCase();
+
+  if (!normalized) {
+    return true;
+  }
+
+  return fields.some((field) => field?.toLowerCase().includes(normalized));
+}
 
 export function CustomersScreen() {
+  const { business } = useAuth();
+  const [search, setSearch] = useState('');
+  const customersQuery = useCustomersQuery(business?.id);
+
+  const filteredCustomers = useMemo(() => {
+    return (customersQuery.data ?? []).filter((customer) =>
+      matchesSearch(search, [customer.displayName, customer.email, customer.phone]),
+    );
+  }, [customersQuery.data, search]);
+
   return (
-    <Screen scrollable>
+    <Screen scrollable avoidKeyboard>
       <View className="gap-6 py-4">
         <SectionHeader
           eyebrow="Customers"
-          title="Customer access should stay quick and quiet."
-          description="This area will stay focused on selecting or creating the right customer before a job closeout begins."
+          title="Keep customer lookup quick and quiet."
+          description="Search fast, open the right customer, or add a new one without turning this into CRM work."
         />
 
-        <EmptyState
-          title="No customers loaded yet"
-          description="Customer data is intentionally not wired in yet. This screen is reserved for fast selection and lightweight creation only."
-          actionLabel="Return to dashboard"
-          onAction={() => router.push('/dashboard')}
-        />
+        {!business?.id ? (
+          <ErrorState
+            title="Business not ready"
+            description="Your business context is still loading. Return to the dashboard and try again in a moment."
+            actionLabel="Back to dashboard"
+            onAction={() => router.replace('/dashboard')}
+          />
+        ) : (
+          <>
+            <PrimaryButton label="Add customer" onPress={() => router.push(createCustomerRoute)} />
 
-        <Card className="gap-4">
-          <Text className="text-base font-semibold text-text">What belongs here</Text>
-          <View className="gap-3">
-            {customerFocus.map((item) => (
-              <Text className="text-sm leading-6 text-muted" key={item}>
-                {item}
-              </Text>
-            ))}
-          </View>
-        </Card>
+            <Input
+              autoCapitalize="none"
+              autoCorrect={false}
+              hint="Search by name, email, or phone."
+              label="Find customer"
+              onChangeText={setSearch}
+              placeholder="Start typing a name"
+              returnKeyType="search"
+              value={search}
+            />
 
-        <Button label="Open jobs" onPress={() => router.push('/jobs')} variant="ghost" />
+            {customersQuery.isLoading ? <LoadingState label="Loading customers" /> : null}
+
+            {customersQuery.isError ? (
+              <ErrorState
+                title="Could not load customers"
+                description="Pull to retry later, or check your connection and try again."
+                actionLabel="Retry"
+                onAction={() => void customersQuery.refetch()}
+              />
+            ) : null}
+
+            {!customersQuery.isLoading && !customersQuery.isError && filteredCustomers.length > 0 ? (
+              <View className="gap-3">
+                {filteredCustomers.map((customer) => (
+                  <CustomerListItem key={customer.id} customer={customer} onPress={() => router.push(getCustomerDetailRoute(customer.id))} />
+                ))}
+              </View>
+            ) : null}
+
+            {!customersQuery.isLoading && !customersQuery.isError && customersQuery.data?.length === 0 ? (
+              <EmptyState
+                title="No customers yet"
+                description="Add your first customer so the next job can move straight into proof capture and invoicing."
+                actionLabel="Create customer"
+                onAction={() => router.push(createCustomerRoute)}
+              />
+            ) : null}
+
+            {!customersQuery.isLoading && !customersQuery.isError && customersQuery.data && customersQuery.data.length > 0 && filteredCustomers.length === 0 ? (
+              <EmptyState
+                title="No matches found"
+                description="Try a customer name, phone number, or email to narrow the list."
+                actionLabel="Clear search"
+                onAction={() => setSearch('')}
+              />
+            ) : null}
+          </>
+        )}
       </View>
     </Screen>
   );

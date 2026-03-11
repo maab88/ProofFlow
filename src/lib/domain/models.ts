@@ -30,6 +30,11 @@ export type Business = {
   displayName: string;
   defaultCurrencyCode: 'CAD' | 'USD';
   timeZone: string;
+  logoStoragePath: string | null;
+  defaultHourlyRateCents: number | null;
+  taxLabel: string | null;
+  taxRateBasisPoints: number | null;
+  onboardingCompletedAt: string | null;
   createdAt: string;
   updatedAt: string;
 };

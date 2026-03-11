@@ -9,21 +9,23 @@ type SegmentedToggleProps<T extends string> = {
   options: readonly SegmentedOption<T>[];
   value: T;
   onValueChange?: (value: T) => void;
+  disabled?: boolean;
 };
 
-export function SegmentedToggle<T extends string>({ options, value, onValueChange }: SegmentedToggleProps<T>) {
+export function SegmentedToggle<T extends string>({ options, value, onValueChange, disabled = false }: SegmentedToggleProps<T>) {
   return (
-    <View accessibilityRole="tablist" className="min-h-touch flex-row rounded-button border border-border bg-surface p-1">
+    <View accessibilityRole="tablist" className={["min-h-touch flex-row rounded-button border border-border bg-surface p-1", disabled ? 'opacity-60' : ''].join(' ')}>
       {options.map((option) => {
         const selected = option.value === value;
         return (
           <Pressable
             accessibilityRole="tab"
-            accessibilityState={{ selected }}
+            accessibilityState={{ disabled, selected }}
             className={[
               'min-h-touch flex-1 items-center justify-center rounded-[16px] px-4',
               selected ? 'bg-surface-raised' : 'bg-transparent',
             ].join(' ')}
+            disabled={disabled}
             key={option.value}
             onPress={() => onValueChange?.(option.value)}
           >

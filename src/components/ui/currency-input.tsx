@@ -22,10 +22,10 @@ export function CurrencyInput({
 }: CurrencyInputProps) {
   return (
     <FieldShell error={error} hint={hint} label={label}>
-      <View className="relative justify-center">
-        <Text className="absolute left-4 z-10 text-base font-semibold text-text-secondary">$</Text>
+      <View className="relative w-full justify-center">
+        <Text className="absolute left-4 z-10 text-base font-semibold text-text-primary">$</Text>
         <InputBase
-          className="pl-8"
+          className="w-full pl-8 text-text-primary"
           hasError={Boolean(error)}
           keyboardType="decimal-pad"
           onChangeText={(next) => {

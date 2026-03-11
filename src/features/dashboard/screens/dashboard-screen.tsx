@@ -1,12 +1,11 @@
 import { router } from 'expo-router';
 import { Text, View } from 'react-native';
 
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { GhostButton } from '@/components/ui/ghost-button';
+import { PrimaryButton } from '@/components/ui/primary-button';
 import { Screen } from '@/components/ui/screen';
-import { SectionHeader } from '@/components/ui/section-header';
 import { StatusBadge } from '@/components/ui/status-badge';
-import { env } from '@/lib/env';
+import { useAuth } from '@/features/auth/hooks/use-auth';
 
 const workflowSteps = [
   'Capture before photos',
@@ -15,63 +14,74 @@ const workflowSteps = [
   'Preview and send the invoice',
 ];
 
-const readinessItems = [
-  { label: 'Auth shell', status: 'Ready', tone: 'success' as const },
-  { label: 'Closeout flow', status: 'Next', tone: 'info' as const },
-  { label: 'Payments', status: 'Later', tone: 'warning' as const },
-];
+function formatHourlyRate(value: number | null | undefined) {
+  if (value == null) {
+    return 'Hourly rate not set';
+  }
+
+  return `$${(value / 100).toFixed(2)}/hr`;
+}
+
+function formatTaxDefaults(label: string | null | undefined, rateBasisPoints: number | null | undefined) {
+  if (!label && rateBasisPoints == null) {
+    return 'Tax defaults not set';
+  }
+
+  if (!label) {
+    return `${(rateBasisPoints! / 100).toFixed(2)}% tax`;
+  }
+
+  if (rateBasisPoints == null) {
+    return `${label} not set`;
+  }
+
+  return `${label} ${(rateBasisPoints / 100).toFixed(2)}%`;
+}
 
 export function DashboardScreen() {
+  const { appUser, business } = useAuth();
+
   return (
     <Screen scrollable>
       <View className="gap-6 py-4">
-        <SectionHeader
-          eyebrow={env.appEnv}
-          title="A tighter final-mile workflow starts here."
-          description="ProofFlow stays focused on closeout readiness instead of turning into a broad field-service suite."
-          rightSlot={<StatusBadge label="Foundation ready" tone="success" />}
-        />
+        <View className="gap-3">
+          <StatusBadge label="Ready for closeout" tone="success" />
+          <Text className="text-[30px] font-semibold leading-10 text-text-primary">
+            {business?.displayName ? `${business.displayName} is ready to wrap up today's work.` : 'Your closeout workspace is ready.'}
+          </Text>
+          <Text className="text-sm leading-6 text-text-secondary">
+            {appUser?.fullName
+              ? `Welcome back, ${appUser.fullName}. Keep the last mile focused on proof, summary, invoice, and payment request.`
+              : 'Keep the last mile focused on proof, summary, invoice, and payment request.'}
+          </Text>
+        </View>
 
-        <Card className="gap-5">
+        <View className="gap-4 rounded-card border border-border bg-surface px-5 py-5">
           <View className="gap-2">
-            <Text className="text-sm font-semibold uppercase tracking-[1.5px] text-accent">App direction</Text>
-            <Text className="text-2xl font-semibold text-text">Built for the moment right after the work is done.</Text>
-            <Text className="text-sm leading-6 text-muted">
-              The app shell is ready for proof capture, summary review, invoice preview, and payment request without expanding into unrelated operations.
-            </Text>
+            <Text className="text-sm font-semibold uppercase tracking-[1.5px] text-primary">Business defaults</Text>
+            <Text className="text-2xl font-semibold text-text-primary">{formatHourlyRate(business?.defaultHourlyRateCents)}</Text>
+            <Text className="text-sm leading-6 text-text-secondary">{formatTaxDefaults(business?.taxLabel, business?.taxRateBasisPoints)}</Text>
           </View>
-          <Button label="Open jobs" onPress={() => router.push('/jobs')} />
-        </Card>
+          <PrimaryButton label="Open jobs" onPress={() => router.push('/jobs')} />
+        </View>
 
-        <Card className="gap-4">
-          <Text className="text-base font-semibold text-text">Readiness</Text>
-          <View className="gap-3">
-            {readinessItems.map((item) => (
-              <View className="flex-row items-center justify-between gap-3" key={item.label}>
-                <Text className="flex-1 text-sm text-muted">{item.label}</Text>
-                <StatusBadge label={item.status} tone={item.tone} />
-              </View>
-            ))}
-          </View>
-        </Card>
-
-        <Card className="gap-4">
-          <Text className="text-base font-semibold text-text">Primary workflow scaffold</Text>
+        <View className="gap-4 rounded-card border border-border bg-surface px-5 py-5">
+          <Text className="text-base font-semibold text-text-primary">Closeout flow</Text>
           <View className="gap-3">
             {workflowSteps.map((step, index) => (
               <View className="flex-row items-center gap-3" key={step}>
-                <View className="h-9 w-9 items-center justify-center rounded-full bg-surface-elevated">
-                  <Text className="text-sm font-semibold text-text">{index + 1}</Text>
+                <View className="h-9 w-9 items-center justify-center rounded-full bg-surface-raised">
+                  <Text className="text-sm font-semibold text-text-primary">{index + 1}</Text>
                 </View>
-                <Text className="flex-1 text-sm leading-6 text-muted">{step}</Text>
+                <Text className="flex-1 text-sm leading-6 text-text-secondary">{step}</Text>
               </View>
             ))}
           </View>
-        </Card>
+        </View>
 
         <View className="gap-3">
-          <Button label="Open customers" onPress={() => router.push('/customers')} variant="secondary" />
-          <Button label="Review settings" onPress={() => router.push('/settings')} variant="ghost" />
+          <GhostButton label="Open customers" onPress={() => router.push('/customers')} />
+          <GhostButton label="Review settings" onPress={() => router.push('/settings')} />
         </View>
       </View>
     </Screen>

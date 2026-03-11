@@ -26,13 +26,14 @@ type InputBaseProps = TextInputProps & {
   hasError?: boolean;
 };
 
-export function InputBase({ multiline = false, hasError = false, ...props }: InputBaseProps) {
+export function InputBase({ multiline = false, hasError = false, className, ...props }: InputBaseProps) {
   return (
     <TextInput
       className={[
-        'min-h-control rounded-button border bg-surface-raised px-4 text-base text-text-primary',
+        'w-full min-h-control rounded-button border bg-surface-raised px-4 text-base text-text-primary',
         multiline ? 'py-4' : '',
         hasError ? 'border-danger' : 'border-border',
+        className ?? '',
       ].join(' ')}
       multiline={multiline}
       placeholderTextColor="#8ea2ba"

@@ -11,6 +11,11 @@ export type Database = {
           display_name: string;
           default_currency_code: 'CAD' | 'USD';
           time_zone: string;
+          logo_storage_path: string | null;
+          default_hourly_rate_cents: number | null;
+          tax_label: string | null;
+          tax_rate_basis_points: number | null;
+          onboarding_completed_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -21,6 +26,11 @@ export type Database = {
           display_name: string;
           default_currency_code?: 'CAD' | 'USD';
           time_zone?: string;
+          logo_storage_path?: string | null;
+          default_hourly_rate_cents?: number | null;
+          tax_label?: string | null;
+          tax_rate_basis_points?: number | null;
+          onboarding_completed_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -31,6 +41,11 @@ export type Database = {
           display_name?: string;
           default_currency_code?: 'CAD' | 'USD';
           time_zone?: string;
+          logo_storage_path?: string | null;
+          default_hourly_rate_cents?: number | null;
+          tax_label?: string | null;
+          tax_rate_basis_points?: number | null;
+          onboarding_completed_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -563,3 +578,5 @@ export type Database = {
     CompositeTypes: Record<string, never>;
   };
 };
+
+

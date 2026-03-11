@@ -71,6 +71,10 @@ export type Job = {
   completedAt: string | null;
   workSummaryDraft: string | null;
   workSummaryFinal: string | null;
+  laborAmountCents: number;
+  partsAmountCents: number;
+  taxAmountCents: number;
+  totalAmountCents: number;
   notes: string | null;
   createdAt: string;
   updatedAt: string;

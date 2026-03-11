@@ -331,6 +331,10 @@ export type Database = {
           completed_at: string | null;
           work_summary_draft: string | null;
           work_summary_final: string | null;
+          labor_amount_cents: number;
+          parts_amount_cents: number;
+          tax_amount_cents: number;
+          total_amount_cents: number;
           notes: string | null;
           created_at: string;
           updated_at: string;
@@ -351,6 +355,10 @@ export type Database = {
           completed_at?: string | null;
           work_summary_draft?: string | null;
           work_summary_final?: string | null;
+          labor_amount_cents?: number;
+          parts_amount_cents?: number;
+          tax_amount_cents?: number;
+          total_amount_cents?: number;
           notes?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -371,6 +379,10 @@ export type Database = {
           completed_at?: string | null;
           work_summary_draft?: string | null;
           work_summary_final?: string | null;
+          labor_amount_cents?: number;
+          parts_amount_cents?: number;
+          tax_amount_cents?: number;
+          total_amount_cents?: number;
           notes?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -510,60 +522,6 @@ export type Database = {
           },
         ];
       };
-      voice_notes: {
-        Row: {
-          id: string;
-          job_id: string;
-          business_id: string;
-          storage_bucket: string;
-          storage_path: string;
-          duration_seconds: number | null;
-          transcript_draft: string | null;
-          transcript_final: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          job_id: string;
-          business_id: string;
-          storage_bucket: string;
-          storage_path: string;
-          duration_seconds?: number | null;
-          transcript_draft?: string | null;
-          transcript_final?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          job_id?: string;
-          business_id?: string;
-          storage_bucket?: string;
-          storage_path?: string;
-          duration_seconds?: number | null;
-          transcript_draft?: string | null;
-          transcript_final?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'voice_notes_business_id_fkey';
-            columns: ['business_id'];
-            isOneToOne: false;
-            referencedRelation: 'businesses';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'voice_notes_job_id_fkey';
-            columns: ['job_id'];
-            isOneToOne: true;
-            referencedRelation: 'jobs';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -578,5 +536,3 @@ export type Database = {
     CompositeTypes: Record<string, never>;
   };
 };
-
-

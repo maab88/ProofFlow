@@ -4,8 +4,19 @@ export const STORAGE_BUCKETS = {
 } as const;
 
 export const storagePaths = {
-  jobPhoto: ({ businessId, jobId, photoId, extension }: { businessId: string; jobId: string; photoId: string; extension: string }) =>
-    `${businessId}/jobs/${jobId}/photos/${photoId}.${extension}`,
+  jobPhoto: ({
+    businessId,
+    jobId,
+    category,
+    photoId,
+    extension,
+  }: {
+    businessId: string;
+    jobId: string;
+    category: 'before' | 'after';
+    photoId: string;
+    extension: string;
+  }) => `${businessId}/jobs/${jobId}/photos/${category}/${photoId}.${extension}`,
   voiceNote: ({ businessId, jobId, voiceNoteId, extension }: { businessId: string; jobId: string; voiceNoteId: string; extension: string }) =>
     `${businessId}/jobs/${jobId}/voice-notes/${voiceNoteId}.${extension}`,
   invoicePdf: ({ businessId, invoiceId, extension = 'pdf' }: { businessId: string; invoiceId: string; extension?: string }) =>

@@ -14,7 +14,16 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   experiments: {
     typedRoutes: true,
   },
-  plugins: ['expo-router'],
+  plugins: [
+    'expo-router',
+    [
+      'expo-image-picker',
+      {
+        cameraPermission: 'Allow ProofFlow to take job photos for the closeout record.',
+        photosPermission: 'Allow ProofFlow to choose job photos from your library for the closeout record.',
+      },
+    ],
+  ],
   web: {
     bundler: 'metro',
   },

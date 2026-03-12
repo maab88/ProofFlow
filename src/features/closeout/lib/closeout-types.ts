@@ -13,6 +13,24 @@ export type CloseoutPhotoStepDraft = {
   itemCount: number;
   placeholderNote: string;
   lastUpdatedAt: string | null;
+  permissionStatus: 'unknown' | 'granted' | 'denied';
+  pendingUploads: CloseoutPendingPhotoUpload[];
+};
+
+export type CloseoutPhotoStepKey = 'beforePhotos' | 'afterPhotos';
+export type CloseoutPhotoSource = 'camera' | 'library';
+export type CloseoutPhotoUploadStatus = 'queued' | 'compressing' | 'uploading' | 'saving' | 'error';
+
+export type CloseoutPendingPhotoUpload = {
+  localId: string;
+  localUri: string;
+  fileName: string;
+  mimeType: string;
+  source: CloseoutPhotoSource;
+  progress: number;
+  status: CloseoutPhotoUploadStatus;
+  errorMessage: string | null;
+  capturedAt: string;
 };
 
 export type CloseoutAudioReference = {
@@ -61,7 +79,6 @@ export type CloseoutDraft = {
   jobId: string;
   jobTitle: string;
   customerName: string;
-  currentStep: CloseoutStepId;
   startedAt: string;
   updatedAt: string;
   beforePhotos: CloseoutPhotoStepDraft;
@@ -89,13 +106,14 @@ export function createCloseoutDraft(seed: CloseoutDraftSeed): CloseoutDraft {
     jobId: seed.jobId,
     jobTitle: seed.jobTitle,
     customerName: seed.customerName,
-    currentStep: 'before-photos',
     startedAt: now,
     updatedAt: now,
     beforePhotos: {
       itemCount: 0,
       placeholderNote: 'Before photos will attach here so the starting condition is easy to prove later.',
       lastUpdatedAt: null,
+      permissionStatus: 'unknown',
+      pendingUploads: [],
     },
     voiceSummary: {
       recordingState: 'idle',
@@ -118,6 +136,8 @@ export function createCloseoutDraft(seed: CloseoutDraftSeed): CloseoutDraft {
       itemCount: 0,
       placeholderNote: 'After photos will confirm the finished result before the invoice goes out.',
       lastUpdatedAt: null,
+      permissionStatus: 'unknown',
+      pendingUploads: [],
     },
     charges: {
       laborAmount: formatMoneyInput(seed.laborAmountCents),

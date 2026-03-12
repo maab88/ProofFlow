@@ -31,6 +31,8 @@ Option B: Supabase CLI
 2. Run `supabase link --project-ref <your-project-ref>`.
 3. Run `supabase db push` from the project root.
 
+Apply every migration in `supabase/migrations`, not only the initial schema. The later migrations add onboarding fields, job amount fields, and storage access policies needed for closeout photo uploads.
+
 ## 4. Recommended storage buckets
 
 Create these buckets in Supabase Storage:
@@ -45,6 +47,8 @@ Examples:
 - `business-id/jobs/job-id/photos/photo-id.jpg`
 - `business-id/jobs/job-id/voice-notes/voice-note-id.m4a`
 - `business-id/invoices/invoice-id/invoice.pdf`
+
+The `job-media` bucket also needs the storage policies from the later SQL migrations so authenticated users can upload and read files inside their own business path.
 
 ## 5. Money approach
 

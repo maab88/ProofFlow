@@ -7,7 +7,7 @@ import { PrimaryButton } from '@/components/ui/primary-button';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { CloseoutStepShell } from '@/features/closeout/components/closeout-step-shell';
 import { useCloseoutJobId } from '@/features/closeout/hooks/use-closeout-job-id';
-import { getCloseoutStepRoute } from '@/features/closeout/lib/closeout-routes';
+import { getCloseoutStepRoute, getNextCloseoutStepLabel } from '@/features/closeout/lib/closeout-routes';
 import { useCloseoutDraftStore } from '@/features/closeout/store/use-closeout-draft-store';
 
 export function InvoicePreviewScreen() {
@@ -18,7 +18,7 @@ export function InvoicePreviewScreen() {
     <CloseoutStepShell
       jobId={jobId}
       stepId="invoice-preview"
-      primaryAction={<PrimaryButton label="Continue to Send" onPress={() => jobId && router.push(getCloseoutStepRoute(jobId, 'send'))} />}
+      primaryAction={<PrimaryButton label={getNextCloseoutStepLabel('invoice-preview') ?? 'Next'} onPress={() => jobId && router.push(getCloseoutStepRoute(jobId, 'send'))} />}
       secondaryAction={<GhostButton label="Back" onPress={() => router.back()} />}
       footerNote="Invoice preview stays customer-facing in tone, but still sits behind your review before anything is sent."
     >

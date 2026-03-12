@@ -6,7 +6,7 @@ import { GhostButton } from '@/components/ui/ghost-button';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { CloseoutStepShell } from '@/features/closeout/components/closeout-step-shell';
 import { useCloseoutJobId } from '@/features/closeout/hooks/use-closeout-job-id';
-import { getCloseoutStepRoute } from '@/features/closeout/lib/closeout-routes';
+import { getCloseoutStepRoute, getNextCloseoutStepLabel } from '@/features/closeout/lib/closeout-routes';
 import { useCloseoutDraftStore } from '@/features/closeout/store/use-closeout-draft-store';
 
 function AmountRow({ label, value }: { label: string; value: string }) {
@@ -26,7 +26,7 @@ export function ChargesScreen() {
     <CloseoutStepShell
       jobId={jobId}
       stepId="charges"
-      primaryAction={<PrimaryButton label="Continue to Invoice Preview" onPress={() => jobId && router.push(getCloseoutStepRoute(jobId, 'invoice-preview'))} />}
+      primaryAction={<PrimaryButton label={getNextCloseoutStepLabel('charges') ?? 'Next'} onPress={() => jobId && router.push(getCloseoutStepRoute(jobId, 'invoice-preview'))} />}
       secondaryAction={<GhostButton label="Back" onPress={() => router.back()} />}
       footerNote="Charges are seeded from the job right now so the later invoice preview step can stay fast and predictable."
     >

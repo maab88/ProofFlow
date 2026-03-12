@@ -6,7 +6,7 @@ import { CloseoutPhotoStepContent } from '@/features/closeout/components/closeou
 import { CloseoutStepShell } from '@/features/closeout/components/closeout-step-shell';
 import { useCloseoutJobId } from '@/features/closeout/hooks/use-closeout-job-id';
 import { useCloseoutPhotoStep } from '@/features/closeout/hooks/use-closeout-photo-step';
-import { getCloseoutStepRoute } from '@/features/closeout/lib/closeout-routes';
+import { getCloseoutStepRoute, getNextCloseoutStepLabel } from '@/features/closeout/lib/closeout-routes';
 import { getJobDetailRoute } from '@/features/jobs/lib/job-routes';
 
 export function BeforePhotosScreen() {
@@ -20,7 +20,7 @@ export function BeforePhotosScreen() {
       primaryAction={
         <PrimaryButton
           disabled={photoState.isUploading}
-          label={photoState.isUploading ? 'Uploads in progress' : 'Continue to Voice Summary'}
+          label={photoState.isUploading ? 'Uploads in progress' : (getNextCloseoutStepLabel('before-photos') ?? 'Next')}
           onPress={() => jobId && router.push(getCloseoutStepRoute(jobId, 'voice-summary'))}
         />
       }

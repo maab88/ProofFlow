@@ -24,11 +24,17 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       },
     ],
   ],
+  ios: {
+    infoPlist: {
+      NSMicrophoneUsageDescription: 'Allow ProofFlow to record a voice summary for the closeout record.',
+    },
+  },
   web: {
     bundler: 'metro',
   },
   android: {
     softwareKeyboardLayoutMode: 'pan',
+    permissions: ['android.permission.RECORD_AUDIO'],
   },
   extra: {
     appEnv: process.env.EXPO_PUBLIC_APP_ENV ?? 'development',

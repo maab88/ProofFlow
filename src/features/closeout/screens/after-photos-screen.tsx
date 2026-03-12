@@ -6,7 +6,7 @@ import { CloseoutPhotoStepContent } from '@/features/closeout/components/closeou
 import { CloseoutStepShell } from '@/features/closeout/components/closeout-step-shell';
 import { useCloseoutJobId } from '@/features/closeout/hooks/use-closeout-job-id';
 import { useCloseoutPhotoStep } from '@/features/closeout/hooks/use-closeout-photo-step';
-import { getCloseoutStepRoute } from '@/features/closeout/lib/closeout-routes';
+import { getCloseoutStepRoute, getNextCloseoutStepLabel } from '@/features/closeout/lib/closeout-routes';
 
 export function AfterPhotosScreen() {
   const jobId = useCloseoutJobId();
@@ -19,7 +19,7 @@ export function AfterPhotosScreen() {
       primaryAction={
         <PrimaryButton
           disabled={photoState.isUploading}
-          label={photoState.isUploading ? 'Uploads in progress' : 'Continue to Charges'}
+          label={photoState.isUploading ? 'Uploads in progress' : (getNextCloseoutStepLabel('after-photos') ?? 'Next')}
           onPress={() => jobId && router.push(getCloseoutStepRoute(jobId, 'charges'))}
         />
       }

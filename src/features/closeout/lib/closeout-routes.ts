@@ -75,3 +75,13 @@ export function getPreviousCloseoutStep(stepId: CloseoutStepId): CloseoutStepId 
 export function getCloseoutStepMeta(stepId: CloseoutStepId) {
   return closeoutStepMeta.find((step) => step.id === stepId)!;
 }
+
+export function getNextCloseoutStepLabel(stepId: CloseoutStepId) {
+  const nextStepId = getNextCloseoutStep(stepId);
+
+  if (!nextStepId) {
+    return null;
+  }
+
+  return `Next: ${getCloseoutStepMeta(nextStepId).title}`;
+}

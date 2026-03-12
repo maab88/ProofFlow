@@ -6,6 +6,7 @@ import {
   createCloseoutDraft,
   type CloseoutDraft,
   type CloseoutDraftSeed,
+  type CloseoutAudioReference,
   type CloseoutPendingPhotoUpload,
   type CloseoutPhotoStepKey,
   type CloseoutVoiceSummaryDraft,
@@ -21,6 +22,34 @@ function normalizePhotoStepDraft(step: Partial<CloseoutDraft['beforePhotos']> | 
   };
 }
 
+function normalizeVoiceSummaryDraft(step: Partial<CloseoutDraft['voiceSummary']> | undefined) {
+  return {
+    recordingState: step?.recordingState ?? 'idle',
+    microphonePermissionStatus: step?.microphonePermissionStatus ?? 'unknown',
+    audioReference: {
+      voiceNoteId: step?.audioReference?.voiceNoteId ?? null,
+      localUri: step?.audioReference?.localUri ?? null,
+      previewUrl: step?.audioReference?.previewUrl ?? null,
+      fileName: step?.audioReference?.fileName ?? null,
+      mimeType: step?.audioReference?.mimeType ?? null,
+      storageBucket: step?.audioReference?.storageBucket ?? null,
+      storagePath: step?.audioReference?.storagePath ?? null,
+      durationSeconds: step?.audioReference?.durationSeconds ?? null,
+      recordedAt: step?.audioReference?.recordedAt ?? null,
+    },
+    uploadStatus: step?.uploadStatus ?? 'idle',
+    uploadErrorMessage: step?.uploadErrorMessage ?? null,
+    transcriptDraftText: step?.transcriptDraftText ?? '',
+    finalWorkSummary: step?.finalWorkSummary ?? '',
+    transcriptionStatus: step?.transcriptionStatus ?? 'idle',
+    canRetryTranscription: step?.canRetryTranscription ?? false,
+    manualEntryAvailable: step?.manualEntryAvailable ?? true,
+    usedManualEntry: step?.usedManualEntry ?? false,
+    lastTranscriptionError: step?.lastTranscriptionError ?? null,
+    lastReviewedAt: step?.lastReviewedAt ?? null,
+  };
+}
+
 function normalizeDraft(draft: CloseoutDraft): CloseoutDraft {
   const beforePhotos = normalizePhotoStepDraft(
     draft.beforePhotos,
@@ -30,6 +59,7 @@ function normalizeDraft(draft: CloseoutDraft): CloseoutDraft {
     draft.afterPhotos,
     'After photos will confirm the finished result before the invoice goes out.',
   );
+  const voiceSummary = normalizeVoiceSummaryDraft(draft.voiceSummary);
 
   const beforeChanged =
     draft.beforePhotos.itemCount !== beforePhotos.itemCount ||
@@ -45,13 +75,37 @@ function normalizeDraft(draft: CloseoutDraft): CloseoutDraft {
     draft.afterPhotos.permissionStatus !== afterPhotos.permissionStatus ||
     draft.afterPhotos.pendingUploads !== afterPhotos.pendingUploads;
 
-  if (!beforeChanged && !afterChanged) {
+  const voiceChanged =
+    draft.voiceSummary.recordingState !== voiceSummary.recordingState ||
+    draft.voiceSummary.microphonePermissionStatus !== voiceSummary.microphonePermissionStatus ||
+    draft.voiceSummary.audioReference.voiceNoteId !== voiceSummary.audioReference.voiceNoteId ||
+    draft.voiceSummary.audioReference.localUri !== voiceSummary.audioReference.localUri ||
+    draft.voiceSummary.audioReference.previewUrl !== voiceSummary.audioReference.previewUrl ||
+    draft.voiceSummary.audioReference.fileName !== voiceSummary.audioReference.fileName ||
+    draft.voiceSummary.audioReference.mimeType !== voiceSummary.audioReference.mimeType ||
+    draft.voiceSummary.audioReference.storageBucket !== voiceSummary.audioReference.storageBucket ||
+    draft.voiceSummary.audioReference.storagePath !== voiceSummary.audioReference.storagePath ||
+    draft.voiceSummary.audioReference.durationSeconds !== voiceSummary.audioReference.durationSeconds ||
+    draft.voiceSummary.audioReference.recordedAt !== voiceSummary.audioReference.recordedAt ||
+    draft.voiceSummary.uploadStatus !== voiceSummary.uploadStatus ||
+    draft.voiceSummary.uploadErrorMessage !== voiceSummary.uploadErrorMessage ||
+    draft.voiceSummary.transcriptDraftText !== voiceSummary.transcriptDraftText ||
+    draft.voiceSummary.finalWorkSummary !== voiceSummary.finalWorkSummary ||
+    draft.voiceSummary.transcriptionStatus !== voiceSummary.transcriptionStatus ||
+    draft.voiceSummary.canRetryTranscription !== voiceSummary.canRetryTranscription ||
+    draft.voiceSummary.manualEntryAvailable !== voiceSummary.manualEntryAvailable ||
+    draft.voiceSummary.usedManualEntry !== voiceSummary.usedManualEntry ||
+    draft.voiceSummary.lastTranscriptionError !== voiceSummary.lastTranscriptionError ||
+    draft.voiceSummary.lastReviewedAt !== voiceSummary.lastReviewedAt;
+
+  if (!beforeChanged && !afterChanged && !voiceChanged) {
     return draft;
   }
 
   return {
     ...draft,
     beforePhotos,
+    voiceSummary,
     afterPhotos,
   };
 }
@@ -62,6 +116,7 @@ type CloseoutDraftState = {
   setHydrated: (value: boolean) => void;
   ensureDraft: (seed: CloseoutDraftSeed) => void;
   updateVoiceSummary: (jobId: string, updates: Partial<CloseoutVoiceSummaryDraft>) => void;
+  syncVoiceSummaryAudioReference: (jobId: string, audioReference: CloseoutAudioReference) => void;
   setPhotoPermission: (jobId: string, step: CloseoutPhotoStepKey, permissionStatus: 'unknown' | 'granted' | 'denied') => void;
   enqueuePendingUploads: (jobId: string, step: CloseoutPhotoStepKey, uploads: CloseoutPendingPhotoUpload[]) => void;
   updatePendingUpload: (
@@ -146,6 +201,65 @@ export const useCloseoutDraftStore = create<CloseoutDraftState>()(
             return state;
           }
 
+          const nextVoiceSummary = {
+            ...draft.voiceSummary,
+            ...updates,
+          };
+
+          const didChange =
+            draft.voiceSummary.recordingState !== nextVoiceSummary.recordingState ||
+            draft.voiceSummary.microphonePermissionStatus !== nextVoiceSummary.microphonePermissionStatus ||
+            draft.voiceSummary.audioReference !== nextVoiceSummary.audioReference ||
+            draft.voiceSummary.uploadStatus !== nextVoiceSummary.uploadStatus ||
+            draft.voiceSummary.uploadErrorMessage !== nextVoiceSummary.uploadErrorMessage ||
+            draft.voiceSummary.transcriptDraftText !== nextVoiceSummary.transcriptDraftText ||
+            draft.voiceSummary.finalWorkSummary !== nextVoiceSummary.finalWorkSummary ||
+            draft.voiceSummary.transcriptionStatus !== nextVoiceSummary.transcriptionStatus ||
+            draft.voiceSummary.canRetryTranscription !== nextVoiceSummary.canRetryTranscription ||
+            draft.voiceSummary.manualEntryAvailable !== nextVoiceSummary.manualEntryAvailable ||
+            draft.voiceSummary.usedManualEntry !== nextVoiceSummary.usedManualEntry ||
+            draft.voiceSummary.lastTranscriptionError !== nextVoiceSummary.lastTranscriptionError ||
+            draft.voiceSummary.lastReviewedAt !== nextVoiceSummary.lastReviewedAt;
+
+          if (!didChange) {
+            return state;
+          }
+
+          return {
+            drafts: {
+              ...state.drafts,
+              [jobId]: {
+                ...draft,
+                updatedAt: new Date().toISOString(),
+                voiceSummary: nextVoiceSummary,
+              },
+            },
+          };
+        }),
+      syncVoiceSummaryAudioReference: (jobId, audioReference) =>
+        set((state) => {
+          const current = state.drafts[jobId];
+          const draft = current ? normalizeDraft(current) : null;
+          if (!draft) {
+            return state;
+          }
+
+          const existing = draft.voiceSummary.audioReference;
+          const unchanged =
+            existing.voiceNoteId === audioReference.voiceNoteId &&
+            existing.localUri === audioReference.localUri &&
+            existing.previewUrl === audioReference.previewUrl &&
+            existing.fileName === audioReference.fileName &&
+            existing.mimeType === audioReference.mimeType &&
+            existing.storageBucket === audioReference.storageBucket &&
+            existing.storagePath === audioReference.storagePath &&
+            existing.durationSeconds === audioReference.durationSeconds &&
+            existing.recordedAt === audioReference.recordedAt;
+
+          if (unchanged) {
+            return state;
+          }
+
           return {
             drafts: {
               ...state.drafts,
@@ -154,7 +268,7 @@ export const useCloseoutDraftStore = create<CloseoutDraftState>()(
                 updatedAt: new Date().toISOString(),
                 voiceSummary: {
                   ...draft.voiceSummary,
-                  ...updates,
+                  audioReference,
                 },
               },
             },

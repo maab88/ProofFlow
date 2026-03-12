@@ -34,18 +34,27 @@ export type CloseoutPendingPhotoUpload = {
 };
 
 export type CloseoutAudioReference = {
+  voiceNoteId: string | null;
   localUri: string | null;
+  previewUrl: string | null;
   fileName: string | null;
+  mimeType: string | null;
+  storageBucket: string | null;
+  storagePath: string | null;
   durationSeconds: number | null;
   recordedAt: string | null;
 };
 
-export type CloseoutRecordingState = 'idle' | 'recording' | 'recorded';
+export type CloseoutRecordingState = 'idle' | 'recording' | 'paused' | 'recorded';
 export type CloseoutTranscriptionStatus = 'idle' | 'loading' | 'success' | 'error';
+export type CloseoutAudioUploadStatus = 'idle' | 'uploading' | 'uploaded' | 'error';
 
 export type CloseoutVoiceSummaryDraft = {
   recordingState: CloseoutRecordingState;
+  microphonePermissionStatus: 'unknown' | 'granted' | 'denied';
   audioReference: CloseoutAudioReference;
+  uploadStatus: CloseoutAudioUploadStatus;
+  uploadErrorMessage: string | null;
   transcriptDraftText: string;
   finalWorkSummary: string;
   transcriptionStatus: CloseoutTranscriptionStatus;
@@ -117,12 +126,20 @@ export function createCloseoutDraft(seed: CloseoutDraftSeed): CloseoutDraft {
     },
     voiceSummary: {
       recordingState: 'idle',
+      microphonePermissionStatus: 'unknown',
       audioReference: {
+        voiceNoteId: null,
         localUri: null,
+        previewUrl: null,
         fileName: null,
+        mimeType: null,
+        storageBucket: null,
+        storagePath: null,
         durationSeconds: null,
         recordedAt: null,
       },
+      uploadStatus: 'idle',
+      uploadErrorMessage: null,
       transcriptDraftText: '',
       finalWorkSummary: '',
       transcriptionStatus: 'idle',
